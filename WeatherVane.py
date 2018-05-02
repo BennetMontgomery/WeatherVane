@@ -1,6 +1,7 @@
 import json
 from urllib3 import *
 import sys
+import math
 
 #load weather data for chosen city
 def loadData(city):
@@ -12,6 +13,12 @@ def loadData(city):
     data = json.loads(httpsData.data.decode('utf-8'))
     #return result
     return data
+
+#apply humidity to temperature using Canadian humidex formula
+def applyHumidity(temperature, humidity):
+    dewpoint = (humidity/100)**(1/8) * (112 + (0.9*temperature)) + (0.1 * temperature) - 112
+    adjustment = 0.5555 * (6.11 * math.exp(5417.753 * ((1/273.15) - (1/dewpoint))) - 10)
+    return temperature + adjustment - 273.15
 
 #print results of weather query
 def printResults(data):
@@ -43,11 +50,12 @@ def printResults(data):
 
     #outputting useful data
     print('The weather in ' + data['name'] + ', ' + data['sys']['country'] + ' today is: ' + data['weather'][0]['description'])
-    print('high temp: \t' + str(data['main']['temp_max'] - 273.15) + 'C')
-    print('low temp: \t' + str(data['main']['temp_min'] - 273.15) + 'C')
-    print('rel humidity: \t' + str(data['main']['humidity']) + '%')
+    print('high temp: \t%.2fC' % (data['main']['temp_max'] - 273.15))
+    print('low temp: \t%.2fC' % (data['main']['temp_min'] - 273.15))
+    print('rel humidity: \t%.0f' % data['main']['humidity'] + '%')
+    print('humidex temp: \t%.2fC' % applyHumidity(data['main']['temp'], data['main']['humidity']))
 
-#main:i
+#main:
 def main():
     #default city is Toronto
     city = "Toronto"
