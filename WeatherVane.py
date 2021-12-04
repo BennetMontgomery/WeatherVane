@@ -29,7 +29,12 @@ def printResults(data):
     #determine how much to fill the thermometer
     #   empty thermometer: <= -30.15C
     #   full thermometer: <= 69.85C
-    temp = data['main']['temp']
+    try:
+        temp = data['main']['temp']
+    except KeyError:
+        print('City not found in database')
+        return 1
+
     for i in range(0, 10):
         bulbedge += '\033[1;37;40m---'
         if temp > 243:
